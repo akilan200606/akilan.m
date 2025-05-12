@@ -1,0 +1,30 @@
+from transformers import pipeline
+import pandas as pd
+
+# Load a pre-trained sentiment analysis pipeline that supports emotions
+emotion_classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", return_all_scores=True)
+
+# Sample social media posts (replace with real tweets/posts if needed)
+posts = [
+    "I'm so excited about my new job!",
+    "Feeling really sad today...",
+    "That was the most hilarious video ever 😂",
+    "I'm worried about my exam results.",
+    "You make me so angry sometimes!",
+    "What a peaceful walk in the park."
+]
+
+# Analyze emotions
+results = []
+for post in posts:
+    emotion_scores = emotion_classifier(post)[0]
+    top_emotion = max(emotion_scores, key=lambda x: x['score'])
+    results.append({
+        "Text": post,
+        "Predicted Emotion": top_emotion['label'],
+        "Confidence": round(top_emotion['score'], 2)
+    })
+
+# Display results as DataFrame
+df = pd.DataFrame(results)
+print(df)
