@@ -1,0 +1,29 @@
+from datasets import load_dataset
+from transformers import pipeline
+import pandas as pd
+
+# Load GoEmotions dataset (Reddit comments labeled with 27 emotions)
+dataset = load_dataset("go_emotions", split="train[:100]")  # Load 100 samples for demo
+
+# Load emotion classification model (compatible with GoEmotions)
+emotion_classifier = pipeline("text-classification", 
+                              model="j-hartmann/emotion-english-distilroberta-base", 
+                              return_all_scores=True)
+
+# Process dataset and predict emotions
+results = []
+
+for data in dataset:
+    text = data['text']
+    scores = emotion_classifier(text)[0]
+    top_emotion = max(scores, key=lambda x: x['score'])
+    
+    results.append({
+        "Text": text,
+        "Predicted Emotion": top_emotion['label'],
+        "Confidence": round(top_emotion['score'], 2)
+    })
+
+# Convert to DataFrame and show results
+df = pd.DataFrame(results)
+print(df.head(10))
